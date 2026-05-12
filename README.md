@@ -35,8 +35,8 @@ Maven:
 val url: String = ...
 val html: String = ...
 
-val readability4J = Readability4J(url, html) // url is just needed to resolve relative urls
-val article = readability4J.parse()
+val readability = Readability(url, html) // url is just needed to resolve relative urls
+val article = readability.parse()
 
 // returns extracted content in a <div> element
 val extractedContentHtml = article.content
@@ -48,19 +48,19 @@ val byline = article.byline
 val excerpt = article.excerpt
 ```
 
-## Readability4J and Readability4JExtended
+## Readability and ReadabilityExtended
 
-The `Readability4J` class sticks close to Mozilla's Readability to keep compatibility.
+The `Readability` class sticks close to Mozilla's Readability to keep compatibility.
 
-`Readability4JExtended` adds some handy features not supported by upstream Readability, e.g. copying the url from a
+`ReadabilityExtended` adds some handy features not supported by upstream Readability, e.g. copying the url from a
 `data-src` attribute to `<img src="" />` to display lazy-loading images, using `<head><base>`'s href value for
 resolving relative urls, and better detection of which images to keep in the output.
 
 If you want to use it, simply instantiate with (the rest of the code stays the same):
 
 ```kotlin
-val readability4J: Readability4J = Readability4JExtended(url, html)
-val article = readability4J.parse()
+val readability: Readability = ReadabilityExtended(url, html)
+val article = readability.parse()
 ```
 
 ## Output encoding
@@ -100,7 +100,7 @@ As mentioned before, this is almost an exact copy of Mozilla's Readability.js. B
 <table>
     <tr>
         <th>Readability.js function</td>
-        <th>Readability4J location</td>
+        <th>Readability location</td>
     </tr>
     <tr>
         <td>_removeScripts() and _prepDocument()</td>
@@ -121,7 +121,7 @@ As mentioned before, this is almost an exact copy of Mozilla's Readability.js. B
 </table>
 
 
-Overview of which Mozilla‘s Readability.js commit a Readability4J version matches:
+Overview of which Mozilla‘s Readability.js commit a Readability version matches:
 
 <table>
     <tr>
@@ -143,7 +143,7 @@ Overview of which Mozilla‘s Readability.js commit a Readability4J version matc
 
 ## Extensibility
 
-The library is designed to be extensible — all of the classes above can be overridden and passed to `Readability4J`'s constructor.
+The library is designed to be extensible — all of the classes above can be overridden and passed to `Readability`'s constructor.
 
 ## Logging
 
@@ -151,7 +151,7 @@ ReadabilityKt uses slf4j as its logging facade, so you can use any slf4j-compati
 
 # License
 
-    Copyright 2017 dankito
+    Copyright 2017 jocmp
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

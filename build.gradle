@@ -102,9 +102,9 @@ mavenPublishing {
 
         developers {
             developer {
-                id = 'dankito'
+                id = 'jocmp'
                 name = 'Christian Dankl'
-                email = 'maven@dankito.net'
+                email = 'maven@jocmp.net'
             }
             developer {
                 id = 'jocmp'
