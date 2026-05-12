@@ -1,7 +1,8 @@
-# Readability4J
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.dankito.readability4j/readability4j/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.dankito.readability4j/readability4j)
+# ReadabilityKt
+[![CI](https://github.com/jocmp/ReadabilityKt/actions/workflows/ci.yml/badge.svg)](https://github.com/jocmp/ReadabilityKt/actions/workflows/ci.yml)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.jocmp/readabilitykt/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.jocmp/readabilitykt)
 
-Readability4J is a Kotlin port of Mozilla's Readability.js, which is used for Firefox's reader view: https://github.com/mozilla/readability.
+ReadabilityKt is a Kotlin port of Mozilla's Readability.js, which is used for Firefox's reader view: https://github.com/mozilla/readability.
 
 It tries to detect the relevant content of a website and removes all clutter from it such as advertisements, navigation bars, social media buttons, etc.
 
@@ -12,17 +13,17 @@ As it‘s compatible with Mozilla‘s Readability.js it produces exact the same 
 ## Setup
 
 Gradle:
-```
+```kotlin
 dependencies {
-  compile 'net.dankito.readability4j:readability4j:1.0.8'
+    implementation("com.jocmp:readabilitykt:1.0.8")
 }
 ```
 
 Maven:
-```
+```xml
 <dependency>
-   <groupId>net.dankito.readability4j</groupId>
-   <artifactId>readability4j</artifactId>
+   <groupId>com.jocmp</groupId>
+   <artifactId>readabilitykt</artifactId>
    <version>1.0.8</version>
 </dependency>
 ```
@@ -30,60 +31,53 @@ Maven:
 
 ## Usage
 
-```java
-String url = ...;
-String html = ...;
+```kotlin
+val url: String = ...
+val html: String = ...
 
-Readability4J readability4J = new Readability4J(url, html); // url is just needed to resolve relative urls
-Article article = readability4J.parse();
+val readability4J = Readability4J(url, html) // url is just needed to resolve relative urls
+val article = readability4J.parse()
 
 // returns extracted content in a <div> element
-String extractedContentHtml = article.getContent();
+val extractedContentHtml = article.content
 // to get content wrapped in <html> tags and encoding set to UTF-8, see chapter 'Output encoding'
-String extractedContentHtmlWithUtf8Encoding = article.getContentWithUtf8Encoding();
-String extractedContentPlainText = article.getTextContent();
-String title = article.getTitle();
-String byline = article.getByline();
-String excerpt = article.getExcerpt();
+val extractedContentHtmlWithUtf8Encoding = article.contentWithUtf8Encoding
+val extractedContentPlainText = article.textContent
+val title = article.title
+val byline = article.byline
+val excerpt = article.excerpt
 ```
 
 ## Readability4J and Readability4JExtended
 
-With Readability4J class I wanted to stick close to Mozilla's Readability to keep compatibility.
+The `Readability4J` class sticks close to Mozilla's Readability to keep compatibility.
 
-But during development I found some handy features not supported by Readability, e. g. copying url from data-src 
-attribute to &lt;img src="" /> to display lazy loading images, using &lt;head>&lt;base>'s href value for resolving 
-relative urls and a 
-better 
-detection of 
-which 
-images to keep in output.
-
-These features I implemented in Readability4JExtended.
+`Readability4JExtended` adds some handy features not supported by upstream Readability, e.g. copying the url from a
+`data-src` attribute to `<img src="" />` to display lazy-loading images, using `<head><base>`'s href value for
+resolving relative urls, and better detection of which images to keep in the output.
 
 If you want to use it, simply instantiate with (the rest of the code stays the same):
 
-<pre>
-Readability4J readability4J = new <b>Readability4JExtended</b>(url, html);
-Article article = readability4J.parse();
-</pre>
+```kotlin
+val readability4J: Readability4J = Readability4JExtended(url, html)
+val article = readability4J.parse()
+```
 
 ## Output encoding
 
-As users noted (see Issue [#1](https://github.com/dankito/Readability4J/issues/1) and [#2](https://github.com/dankito/Readability4J/issues/2))
-by default no encoding is applied to Readability4J's output resulting in incorrect display of non-ASCII characters.
+By default no encoding is applied to ReadabilityKt's output, which can result in incorrect display of non-ASCII characters.
 
-The reason is like Readability.js Readability4J returns its output in a &lt;div> element, and the only way to set the
-encoding in HTML is in a &lt;head>&lt;meta charset=""> tag.
+Like Readability.js, ReadabilityKt returns its output in a `<div>` element, and the only way to set the encoding in
+HTML is via a `<head><meta charset="" />` tag.
 
-So I added these convenience methods to Article class
+So these convenience methods are exposed on `Article`:
 
-```java
-String contentHtmlWithUtf8Encoding = article.getContentWithUtf8Encoding();
-// or (tries to apply site's charset, if set, or if not uses UTF-8 as fallback
-String contentWithDocumentsCharsetOrUtf8 = article.getContentWithDocumentsCharsetOrUtf8();
+```kotlin
+val contentHtmlWithUtf8Encoding = article.contentWithUtf8Encoding
+// or (tries to apply site's charset, falling back to UTF-8)
+val contentWithDocumentsCharsetOrUtf8 = article.contentWithDocumentsCharsetOrUtf8
 // or
-String contentHtmlWithCustomEncoding = article.getContentWithEncoding("ISO-8859-1");
+val contentHtmlWithCustomEncoding = article.getContentWithEncoding("ISO-8859-1")
 ```
 
 which wrap the content in
@@ -149,13 +143,11 @@ Overview of which Mozilla‘s Readability.js commit a Readability4J version matc
 
 ## Extensibility
 
-I tried to create the library as extensible as possible. All above mentioned classes can be overwritten and passed to Readability4J's constructor.
+The library is designed to be extensible — all of the classes above can be overridden and passed to `Readability4J`'s constructor.
 
 ## Logging
 
-Readability4J uses slf4j as logging facade.
-
-So you can use any logger that supports slf4j, like Logback and log4j, to configure and get Readability4J's log output.
+ReadabilityKt uses slf4j as its logging facade, so you can use any slf4j-compatible logger (Logback, log4j, etc.) to configure and capture its log output.
 
 # License
 
