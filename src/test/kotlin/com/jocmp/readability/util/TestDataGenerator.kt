@@ -9,25 +9,23 @@ import okhttp3.Response
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-
-
 fun main(args: Array<String>) {
-    TestDataGenerator().generateTestData("additional-test-pages", "",
-            "") // set test case name and url here
+    TestDataGenerator().generateTestData(
+        "additional-test-pages",
+        "",
+        "",
+    ) // set test case name and url here
 }
 
-
 class TestDataGenerator : TestDataGeneratorBase() {
-
     companion object {
-        const val DefaultUserAgent = ""
+        const val DEFAULT_USER_AGENT = ""
 
-        const val DefaultCountRetries = 1
+        const val DEFAULT_COUNT_RETRIES = 1
 
         val client: OkHttpClient
 
         private val log = LoggerFactory.getLogger(TestDataGenerator::class.java)
-
 
         init {
             val builder = OkHttpClient.Builder()
@@ -42,10 +40,12 @@ class TestDataGenerator : TestDataGeneratorBase() {
         }
     }
 
-
-
     @Throws(Exception::class)
-    fun generateTestData(testFolderName: String, testCaseName: String, url: String) {
+    fun generateTestData(
+        testFolderName: String,
+        testCaseName: String,
+        url: String,
+    ) {
         val webSiteHtml = getResponse(url)
 
         // We pass `caption` as a class to check that passing in extra classes works,
@@ -59,13 +59,12 @@ class TestDataGenerator : TestDataGeneratorBase() {
         writeTestData(webSiteHtml, article, articleExtended, testFolderName, testCaseName)
     }
 
-
     @Throws(Exception::class)
     private fun getResponse(url: String): String {
         try {
             val request = createGetRequest(url)
 
-            val response = executeRequest(request, DefaultCountRetries)
+            val response = executeRequest(request, DEFAULT_COUNT_RETRIES)
 
             return response.body()?.string() ?: ""
         } catch (e: Exception) {
@@ -75,18 +74,23 @@ class TestDataGenerator : TestDataGeneratorBase() {
     }
 
     @Throws(Exception::class)
-    private fun executeRequest(request: Request, countRetries: Int = 0): Response {
+    private fun executeRequest(
+        request: Request,
+        countRetries: Int = 0,
+    ): Response {
         val response = client.newCall(request).execute()
 
-        if(response.isSuccessful == false && countRetries > 0) {
+        if (response.isSuccessful == false && countRetries > 0) {
             return executeRequest(request, countRetries - 1)
-        }
-        else {
+        } else {
             return response
         }
     }
 
-    private fun createGetRequest(url: String, userAgent: String = DefaultUserAgent): Request {
+    private fun createGetRequest(
+        url: String,
+        userAgent: String = DEFAULT_USER_AGENT,
+    ): Request {
         val requestBuilder = Request.Builder()
 
         requestBuilder.url(url)
@@ -95,5 +99,4 @@ class TestDataGenerator : TestDataGeneratorBase() {
 
         return requestBuilder.build()
     }
-
 }

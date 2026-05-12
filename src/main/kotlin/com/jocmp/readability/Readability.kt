@@ -12,13 +12,10 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 
-
 open class Readability {
-
     companion object {
         private val log = LoggerFactory.getLogger(Readability::class.java)
     }
-
 
     protected val uri: String
 
@@ -36,29 +33,44 @@ open class Readability {
 
     protected val postprocessor: Postprocessor
 
-
     // TODO: add IDependencyResolver interface and @JvmOverloads
 
     // for Java interoperability
+
     /**
      * Calls Readability(String, String, ReadabilityOptions) with default ReadabilityOptions
      */
     constructor(uri: String, html: String) : this(uri, html, ReadabilityOptions())
 
-    constructor(uri: String, html: String, options: ReadabilityOptions = ReadabilityOptions(), regExUtil: RegExUtil = RegExUtil(),
-                preprocessor: Preprocessor = Preprocessor(regExUtil), metadataParser: MetadataParser = MetadataParser(regExUtil),
-                articleGrabber: ArticleGrabber = ArticleGrabber(options, regExUtil), postprocessor: Postprocessor = Postprocessor())
-            : this(uri, Jsoup.parse(html, uri), options, regExUtil, preprocessor, metadataParser, articleGrabber, postprocessor)
+    constructor(
+        uri: String,
+        html: String,
+        options: ReadabilityOptions = ReadabilityOptions(),
+        regExUtil: RegExUtil = RegExUtil(),
+        preprocessor: Preprocessor = Preprocessor(regExUtil),
+        metadataParser: MetadataParser = MetadataParser(regExUtil),
+        articleGrabber: ArticleGrabber = ArticleGrabber(options, regExUtil),
+        postprocessor: Postprocessor = Postprocessor(),
+    ) :
+        this(uri, Jsoup.parse(html, uri), options, regExUtil, preprocessor, metadataParser, articleGrabber, postprocessor)
 
     // for Java interoperability
+
     /**
      * Calls Readability(String, Document, ReadabilityOptions) with default ReadabilityOptions
      */
     constructor(uri: String, document: Document) : this(uri, document, ReadabilityOptions())
 
-    constructor(uri: String, document: Document, options: ReadabilityOptions = ReadabilityOptions(), regExUtil: RegExUtil = RegExUtil(),
-                preprocessor: Preprocessor = Preprocessor(regExUtil), metadataParser: MetadataParser = MetadataParser(regExUtil),
-                articleGrabber: ArticleGrabber = ArticleGrabber(options, regExUtil), postprocessor: Postprocessor = Postprocessor()) {
+    constructor(
+        uri: String,
+        document: Document,
+        options: ReadabilityOptions = ReadabilityOptions(),
+        regExUtil: RegExUtil = RegExUtil(),
+        preprocessor: Preprocessor = Preprocessor(regExUtil),
+        metadataParser: MetadataParser = MetadataParser(regExUtil),
+        articleGrabber: ArticleGrabber = ArticleGrabber(options, regExUtil),
+        postprocessor: Postprocessor = Postprocessor(),
+    ) {
         this.uri = uri
         this.document = document
         this.options = options
@@ -69,7 +81,6 @@ open class Readability {
         this.articleGrabber = articleGrabber
         this.postprocessor = postprocessor
     }
-
 
     /**
      *
@@ -87,8 +98,11 @@ open class Readability {
         // Avoid parsing too large documents, as per configuration option
         if (options.maxElemsToParse > 0) {
             val numTags = document.getElementsByTag("*").size
-            if(numTags > options.maxElemsToParse) {
-                throw Exception("Aborting parsing document; $numTags elements found, but ReadabilityOption.maxElemsToParse is set to ${options.maxElemsToParse}")
+            if (numTags > options.maxElemsToParse) {
+                throw Exception(
+                    "Aborting parsing document; $numTags elements found, but " +
+                        "ReadabilityOption.maxElemsToParse is set to ${options.maxElemsToParse}",
+                )
             }
         }
 
@@ -106,27 +120,30 @@ open class Readability {
 
             article.articleContent = articleContent
         }
-        
+
         setArticleMetadata(article, metadata, articleContent)
 
         return article
     }
 
-    protected open fun setArticleMetadata(article: Article, metadata: ArticleMetadata, articleContent: Element?) {
+    protected open fun setArticleMetadata(
+        article: Article,
+        metadata: ArticleMetadata,
+        articleContent: Element?,
+    ) {
         // If we haven't found an excerpt in the article's metadata, use the article's
         // first paragraph as the excerpt. This is used for displaying a preview of
         // the article's content.
-        if(metadata.excerpt.isNullOrBlank()) {
+        if (metadata.excerpt.isNullOrBlank()) {
             articleContent?.getElementsByTag("p")?.first()?.let { firstParagraph ->
                 metadata.excerpt = firstParagraph.text().trim()
             }
         }
 
         article.title = metadata.title
-        article.byline = if(metadata.byline.isNullOrBlank()) articleGrabber.articleByline else metadata.byline
+        article.byline = if (metadata.byline.isNullOrBlank()) articleGrabber.articleByline else metadata.byline
         article.dir = articleGrabber.articleDir
         article.excerpt = metadata.excerpt
         article.charset = metadata.charset
     }
-
 }

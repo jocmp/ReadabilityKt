@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory
  * Performs basic sanitization before starting the extraction process.
  */
 open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : ProcessorBase() {
-
     companion object {
         private val log = LoggerFactory.getLogger(Preprocessor::class.java)
     }
-
 
     /**
      * Prepare the HTML document for readability to scrape it.
@@ -24,7 +22,7 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
         log.debug("Starting to prepare document")
 
         removeScripts(document)
-        removeNoscripts(document);
+        removeNoscripts(document)
 
         removeStyles(document)
 
@@ -37,7 +35,6 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
         replaceNodes(document, "font", "span")
     }
 
-
     protected open fun removeScripts(document: Document) {
         removeNodes(document, "script") { scriptNode ->
             scriptNode.`val`(null) // TODO: what is this good for?
@@ -48,25 +45,27 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
 
     protected open fun removeNoscripts(document: Document) {
         document.getElementsByTag("noscript").forEach { noscript ->
-            if(shouldKeepImageInNoscriptElement(document, noscript)) { // TODO: this is not in Mozilla's Readability
+            if (shouldKeepImageInNoscriptElement(document, noscript)) { // TODO: this is not in Mozilla's Readability
                 noscript.unwrap()
-            }
-            else {
+            } else {
                 printAndRemove(noscript, "removeScripts('noscript')")
             }
         }
     }
 
-    protected open fun shouldKeepImageInNoscriptElement(document: Document, noscript: Element): Boolean {
+    protected open fun shouldKeepImageInNoscriptElement(
+        document: Document,
+        noscript: Element,
+    ): Boolean {
         val images = noscript.select("img")
-        if(images.size > 0) {
+        if (images.size > 0) {
             val imagesToKeep = ArrayList(images)
 
             images.forEach { image ->
                 // thanks to swuqi (https://github.com/swuqi) for reporting this bug.
                 // see https://github.com/jocmp/Readability/issues/4
                 val source = image.attr("src")
-                if(source.isNotBlank() && document.select("img[src=$source]").size > 0) {
+                if (source.isNotBlank() && document.select("img[src=$source]").size > 0) {
                     imagesToKeep.remove(image)
                 }
             }
@@ -89,16 +88,14 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
         var i = 0
         while (i < node.childNodeSize()) {
             val child = node.childNode(i)
-            if(child.nodeName() == "#comment") {
+            if (child.nodeName() == "#comment") {
                 printAndRemove(child, "removeComments")
-            }
-            else {
+            } else {
                 removeComments(child)
                 i++
             }
         }
     }
-
 
     /**
      * Replaces 2 or more successive <br> elements with a single <p>.
@@ -107,7 +104,10 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
      * will become:
      *   <div>foo<br>bar<p>abc</p></div>
      */
-    protected open fun replaceBrs(document: Document, regEx: RegExUtil) {
+    protected open fun replaceBrs(
+        document: Document,
+        regEx: RegExUtil,
+    ) {
         document.body().select("br").forEach { br ->
             var next: Node? = br.nextSibling()
 
@@ -119,7 +119,7 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
             // or non-whitespace. This leaves behind the first <br> in the chain
             // (which will be replaced with a <p> later).
             next = nextElement(next, regEx)
-            while(next != null && next.nodeName() == "br") {
+            while (next != null && next.nodeName() == "br") {
                 replaced = true
                 val brSibling = (next as? Element)?.nextSibling()
                 printAndRemove(next, "replaceBrs")
@@ -129,17 +129,18 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
             // If we removed a <br> chain, replace the remaining <br> with a <p>. Add
             // all sibling nodes as children of the <p> until we hit another <br>
             // chain.
-            if(replaced) {
+            if (replaced) {
                 val p = br.ownerDocument().createElement("p")
                 br.replaceWith(p)
 
                 next = p.nextSibling()
-                while(next != null) {
+                while (next != null) {
                     // If we've hit another <br><br>, we're done adding children to this <p>.
-                    if(next.nodeName() == "br") {
+                    if (next.nodeName() == "br") {
                         val nextElem = this.nextElement(next, regEx)
-                        if(nextElem != null && nextElem.tagName() == "br")
+                        if (nextElem != null && nextElem.tagName() == "br") {
                             break
+                        }
                     }
 
                     // Otherwise, make this node a child of the new <p>.
@@ -150,5 +151,4 @@ open class Preprocessor(protected val regEx: RegExUtil = RegExUtil()) : Processo
             }
         }
     }
-
 }

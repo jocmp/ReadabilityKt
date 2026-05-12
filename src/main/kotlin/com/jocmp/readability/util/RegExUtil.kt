@@ -2,40 +2,39 @@ package com.jocmp.readability.util
 
 import java.util.regex.Pattern
 
-
 open class RegExUtil {
-
     companion object {
-        const val UnlikelyCandidatesDefaultPattern = "banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|" +
+        const val UNLIKELY_CANDIDATES_DEFAULT_PATTERN =
+            "banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|" +
                 "foot|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|" +
                 "ad-break|agegate|pagination|pager|popup|yom-remote"
 
-        const val OkMaybeItsACandidateDefaultPattern = "and|article|body|column|main|shadow"
+        const val OK_MAYBE_ITS_A_CANDIDATE_DEFAULT_PATTERN = "and|article|body|column|main|shadow"
 
-        const val PositiveDefaultPattern = "article|body|content|entry|hentry|h-entry|main|page|pagination|post|text|blog|story"
+        const val POSITIVE_DEFAULT_PATTERN = "article|body|content|entry|hentry|h-entry|main|page|pagination|post|text|blog|story"
 
-        const val NegativeDefaultPattern = "hidden|^hid$| hid$| hid |^hid |banner|combx|comment|com-|contact|foot|footer|footnote|" +
+        const val NEGATIVE_DEFAULT_PATTERN =
+            "hidden|^hid$| hid$| hid |^hid |banner|combx|comment|com-|contact|foot|footer|footnote|" +
                 "masthead|media|meta|outbrain|promo|related|scroll|share|shoutbox|sidebar|skyscraper|sponsor|shopping|tags|tool|widget"
 
-        const val ExtraneousDefaultPattern = "print|archive|comment|discuss|e[\\-]?mail|share|reply|all|login|sign|single|utility"
+        const val EXTRANEOUS_DEFAULT_PATTERN = "print|archive|comment|discuss|e[\\-]?mail|share|reply|all|login|sign|single|utility"
 
-        const val BylineDefaultPattern = "byline|author|dateline|writtenby|p-author"
+        const val BYLINE_DEFAULT_PATTERN = "byline|author|dateline|writtenby|p-author"
 
-        const val ReplaceFontsDefaultPattern = "<(/?)font[^>]*>"
+        const val REPLACE_FONTS_DEFAULT_PATTERN = "<(/?)font[^>]*>"
 
-        const val NormalizeDefaultPattern = "\\s{2,}"
+        const val NORMALIZE_DEFAULT_PATTERN = "\\s{2,}"
 
-        const val VideosDefaultPattern = "//(www\\.)?(dailymotion|youtube|youtube-nocookie|player\\.vimeo)\\.com"
+        const val VIDEOS_DEFAULT_PATTERN = "//(www\\.)?(dailymotion|youtube|youtube-nocookie|player\\.vimeo)\\.com"
 
-        const val NextLinkDefaultPattern = "(next|weiter|continue|>([^\\|]|$)|»([^\\|]|$))"
+        const val NEXT_LINK_DEFAULT_PATTERN = "(next|weiter|continue|>([^\\|]|$)|»([^\\|]|$))"
 
-        const val PrevLinkDefaultPattern = "(prev|earl|old|new|<|«)"
+        const val PREV_LINK_DEFAULT_PATTERN = "(prev|earl|old|new|<|«)"
 
-        const val WhitespaceDefaultPattern = "^\\s*$"
+        const val WHITESPACE_DEFAULT_PATTERN = "^\\s*$"
 
-        const val HasContentDefaultPattern = "\\S$"
+        const val HAS_CONTENT_DEFAULT_PATTERN = "\\S$"
     }
-
 
     protected val unlikelyCandidates: Pattern
 
@@ -63,14 +62,21 @@ open class RegExUtil {
 
     protected val hasContent: Pattern
 
-
-    constructor(unlikelyCandidatesPattern: String = UnlikelyCandidatesDefaultPattern, okMaybeItsACandidatePattern: String = OkMaybeItsACandidateDefaultPattern,
-                positivePattern: String = PositiveDefaultPattern, negativePattern: String = NegativeDefaultPattern,
-                extraneousPattern: String = ExtraneousDefaultPattern, bylinePattern: String = BylineDefaultPattern,
-                replaceFontsPattern: String = ReplaceFontsDefaultPattern, normalizePattern: String = NormalizeDefaultPattern,
-                videosPattern: String = VideosDefaultPattern, nextLinkPattern: String = NextLinkDefaultPattern,
-                prevLinkPattern: String = PrevLinkDefaultPattern, whitespacePattern: String = WhitespaceDefaultPattern,
-                hasContentPattern: String = HasContentDefaultPattern) {
+    constructor(
+        unlikelyCandidatesPattern: String = UNLIKELY_CANDIDATES_DEFAULT_PATTERN,
+        okMaybeItsACandidatePattern: String = OK_MAYBE_ITS_A_CANDIDATE_DEFAULT_PATTERN,
+        positivePattern: String = POSITIVE_DEFAULT_PATTERN,
+        negativePattern: String = NEGATIVE_DEFAULT_PATTERN,
+        extraneousPattern: String = EXTRANEOUS_DEFAULT_PATTERN,
+        bylinePattern: String = BYLINE_DEFAULT_PATTERN,
+        replaceFontsPattern: String = REPLACE_FONTS_DEFAULT_PATTERN,
+        normalizePattern: String = NORMALIZE_DEFAULT_PATTERN,
+        videosPattern: String = VIDEOS_DEFAULT_PATTERN,
+        nextLinkPattern: String = NEXT_LINK_DEFAULT_PATTERN,
+        prevLinkPattern: String = PREV_LINK_DEFAULT_PATTERN,
+        whitespacePattern: String = WHITESPACE_DEFAULT_PATTERN,
+        hasContentPattern: String = HAS_CONTENT_DEFAULT_PATTERN,
+    ) {
         this.unlikelyCandidates = Pattern.compile(unlikelyCandidatesPattern, Pattern.CASE_INSENSITIVE)
         this.okMaybeItsACandidate = Pattern.compile(okMaybeItsACandidatePattern, Pattern.CASE_INSENSITIVE)
         this.positive = Pattern.compile(positivePattern, Pattern.CASE_INSENSITIVE)
@@ -85,7 +91,6 @@ open class RegExUtil {
         this.whitespace = Pattern.compile(whitespacePattern)
         this.hasContent = Pattern.compile(hasContentPattern)
     }
-
 
     open fun isPositive(matchString: String): Boolean {
         return positive.matcher(matchString).find()
@@ -122,5 +127,4 @@ open class RegExUtil {
     open fun isVideo(matchString: String): Boolean {
         return videos.matcher(matchString).find()
     }
-
 }

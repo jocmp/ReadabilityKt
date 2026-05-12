@@ -10,60 +10,75 @@ import org.slf4j.LoggerFactory
  * Contains common utils for Preprocessor and Postprocessor
  */
 abstract class ProcessorBase {
-
     companion object {
-        protected const val TruncateLogOutput = false
+        protected const val TRUNCATE_LOG_OUTPUT = false
 
         private val log = LoggerFactory.getLogger(ProcessorBase::class.java)
     }
 
-
-    protected open fun removeNodes(element: Element, tagName: String, filterFunction: ((Element) -> Boolean)? = null) {
+    protected open fun removeNodes(
+        element: Element,
+        tagName: String,
+        filterFunction: ((Element) -> Boolean)? = null,
+    ) {
         element.getElementsByTag(tagName).reversed().forEach { childElement ->
-            if(childElement.parentNode() != null) {
-                if(filterFunction == null || filterFunction(childElement)) {
+            if (childElement.parentNode() != null) {
+                if (filterFunction == null || filterFunction(childElement)) {
                     printAndRemove(childElement, "removeNode('$tagName')")
                 }
             }
         }
     }
 
-    protected open fun printAndRemove(node: Node, reason: String) {
-        if(node.parent() != null) {
+    protected open fun printAndRemove(
+        node: Node,
+        reason: String,
+    ) {
+        if (node.parent() != null) {
             logNodeInfo(node, reason)
             node.remove()
         }
     }
 
-    protected open fun logNodeInfo(node: Node, reason: String) {
+    protected open fun logNodeInfo(
+        node: Node,
+        reason: String,
+    ) {
         val nodeToString =
-        if(TruncateLogOutput)
-            node.outerHtml().substring(0, Math.min(node.outerHtml().length, 80)).replace("\n", "")
-        else
-            "\n------\n" + node.outerHtml() + "\n------\n"
+            if (TRUNCATE_LOG_OUTPUT) {
+                node.outerHtml().substring(0, Math.min(node.outerHtml().length, 80)).replace("\n", "")
+            } else {
+                "\n------\n" + node.outerHtml() + "\n------\n"
+            }
 
         log.debug("{} [{}]", reason, nodeToString)
     }
 
-
-    protected open fun replaceNodes(parentElement: Element, tagName: String, newTagName: String) {
+    protected open fun replaceNodes(
+        parentElement: Element,
+        tagName: String,
+        newTagName: String,
+    ) {
         parentElement.getElementsByTag(tagName).forEach { element ->
             element.tagName(newTagName)
         }
     }
-
 
     /**
      * Finds the next element, starting from the given node, and ignoring
      * whitespace in between. If the given node is an element, the same node is
      * returned.
      */
-    protected open fun nextElement(node: Node?, regEx: RegExUtil): Element? {
+    protected open fun nextElement(
+        node: Node?,
+        regEx: RegExUtil,
+    ): Element? {
         var next: Node? = node
 
-        while(next != null
-                && (next is Element == false)
-                && (next is TextNode && regEx.isWhitespace(next.text()))) {
+        while (next != null &&
+            (next is Element == false) &&
+            (next is TextNode && regEx.isWhitespace(next.text()))
+        ) {
             next = next.nextSibling()
         }
 
@@ -74,14 +89,17 @@ abstract class ProcessorBase {
      * Get the inner text of a node - cross browser compatibly.
      * This also strips out any excess whitespace to be found.
      */
-    protected open fun getInnerText(e: Element, regEx: RegExUtil? = null, normalizeSpaces: Boolean = true): String {
+    protected open fun getInnerText(
+        e: Element,
+        regEx: RegExUtil? = null,
+        normalizeSpaces: Boolean = true,
+    ): String {
         val textContent = e.text().trim()
 
-        if(normalizeSpaces && regEx != null) {
+        if (normalizeSpaces && regEx != null) {
             return regEx.normalize(textContent)
         }
 
         return textContent
     }
-
 }

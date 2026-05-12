@@ -9,12 +9,9 @@ import com.jocmp.readability.model.ReadabilityOptions
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.util.*
 
 abstract class ReadabilityTestBase {
-
     companion object {
-
         protected val objectMapper = ObjectMapper()
 
         init {
@@ -22,12 +19,14 @@ abstract class ReadabilityTestBase {
         }
     }
 
-
     protected open fun getExpectedText(testData: PageTestData): String? {
         return testData.expectedOutput
     }
 
-    protected open fun getActualText(article: Article, testData: PageTestData): String? {
+    protected open fun getActualText(
+        article: Article,
+        testData: PageTestData,
+    ): String? {
         return article.content
     }
 
@@ -39,7 +38,10 @@ abstract class ReadabilityTestBase {
         return testData.expectedMetadata.excerpt
     }
 
-    protected open fun getActualExcerpt(testData: PageTestData, article: Article): String? {
+    protected open fun getActualExcerpt(
+        testData: PageTestData,
+        article: Article,
+    ): String? {
         return article.excerpt
     }
 
@@ -47,19 +49,23 @@ abstract class ReadabilityTestBase {
         return testData.expectedMetadata.byline
     }
 
-
-
-    protected open fun testPage(url: String, testPageFolderName: String, pageName: String): Article {
+    protected open fun testPage(
+        url: String,
+        testPageFolderName: String,
+        pageName: String,
+    ): Article {
         val testData = loadTestData(testPageFolderName, pageName)
 
         return testPage(url, testData)
     }
 
-    protected open fun testPage(url: String, testData: PageTestData): Article {
+    protected open fun testPage(
+        url: String,
+        testData: PageTestData,
+    ): Article {
         val underTest = createReadability(url, testData)
 
         val article = underTest.parse()
-
 
         val expected = getExpectedText(testData)
         val actual = getActualText(article, testData)
@@ -68,49 +74,63 @@ abstract class ReadabilityTestBase {
             "Expected:\n${expected}\n\nActual:\n${actual}\n\nDiff:\n${DiffUtils.diff(expected, actual).deltas.joinToString("\n")}"
         }
 
-
         testMetadata(testData, article)
 
         return article
     }
 
-    protected open fun createReadability(url: String, testData: PageTestData): Readability {
+    protected open fun createReadability(
+        url: String,
+        testData: PageTestData,
+    ): Readability {
         // Provide one class name to preserve, which we know appears in a few
         // of the test documents.
-        return Readability(url, testData.sourceHtml,
-                ReadabilityOptions(additionalClassesToPreserve = Arrays.asList("caption")))
+        return Readability(
+            url,
+            testData.sourceHtml,
+            ReadabilityOptions(additionalClassesToPreserve = listOf("caption")),
+        )
     }
 
-
-    protected open fun testMetadata(testData: PageTestData, article: Article) {
+    protected open fun testMetadata(
+        testData: PageTestData,
+        article: Article,
+    ) {
         val expectedTitle = getExpectedTitle(testData)
         assert(expectedTitle == article.title) { "Title doesn't match\n\nExpected:\n${expectedTitle}\n\nActual:\n${article.title}" }
 
         val expectedExcerpt = getExpectedExcerpt(testData)
         val actualExcerpt = getActualExcerpt(testData, article)
-        assert(expectedExcerpt == actualExcerpt) { "Excerpt doesn't match\n\nExpected:\n${expectedExcerpt}\n\nActual:\n${actualExcerpt}" }
+        assert(expectedExcerpt == actualExcerpt) { "Excerpt doesn't match\n\nExpected:\n${expectedExcerpt}\n\nActual:\n$actualExcerpt" }
 
         val expectedByline = getExpectedByline(testData)
         assert(expectedByline == article.byline) { "Byline doesn't match\n\nExpected:\n${expectedByline}\n\nActual:\n${article.byline}" }
 
-        if(testData.expectedMetadata.dir != null) {
-            assert(testData.expectedMetadata.dir == article.dir) { "Dir doesn't match\n\nExpected:\n${testData.expectedMetadata.dir}\n\nActual:\n${article.dir}" }
+        if (testData.expectedMetadata.dir != null) {
+            assert(testData.expectedMetadata.dir == article.dir) {
+                "Dir doesn't match\n\nExpected:\n${testData.expectedMetadata.dir}\n\nActual:\n${article.dir}"
+            }
         }
     }
 
-
-    protected open fun loadTestData(testPageFolderName: String, pageName: String): PageTestData {
+    protected open fun loadTestData(
+        testPageFolderName: String,
+        pageName: String,
+    ): PageTestData {
         val sourceHtml = getFileContentFromResource(testPageFolderName, pageName, "source.html")
         val expectedOutput = getFileContentFromResource(testPageFolderName, pageName, "expected.html")
 
         val expectedMetadataString = getFileContentFromResource(testPageFolderName, pageName, "expected-metadata.json")
         val expectedMetadata = objectMapper.readValue<ArticleMetadata>(expectedMetadataString, ArticleMetadata::class.java)
 
-
         return PageTestData(pageName, sourceHtml, expectedOutput, expectedMetadata)
     }
 
-    protected open fun getFileContentFromResource(testPageFolderName: String, pageName: String, resourceFilename: String): String {
+    protected open fun getFileContentFromResource(
+        testPageFolderName: String,
+        pageName: String,
+        resourceFilename: String,
+    ): String {
         val url = this.javaClass.classLoader.getResource("$testPageFolderName/$pageName/$resourceFilename")
         val file = File(url.toURI())
 
@@ -121,5 +141,4 @@ abstract class ReadabilityTestBase {
 
         return fileContent
     }
-
 }

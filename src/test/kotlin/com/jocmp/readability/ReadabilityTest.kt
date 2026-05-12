@@ -3,11 +3,9 @@ package com.jocmp.readability
 import org.junit.Test
 
 open class ReadabilityTest : ReadabilityTestBase() {
-
     companion object {
-        const val ReadabilityFakeTestUrl = "http://fakehost/test/page.html"
+        const val READABILITY_FAKE_TEST_URL = "http://fakehost/test/page.html"
     }
-
 
     @Test
     fun test001() {
@@ -394,9 +392,7 @@ open class ReadabilityTest : ReadabilityTestBase() {
         testPage("youth")
     }
 
-
     protected open fun testPage(pageName: String) {
-        testPage(ReadabilityFakeTestUrl, "test-pages", pageName)
+        testPage(READABILITY_FAKE_TEST_URL, "test-pages", pageName)
     }
-
 }
